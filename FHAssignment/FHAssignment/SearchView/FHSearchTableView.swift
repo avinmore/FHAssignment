@@ -13,18 +13,18 @@ class FHSearchTableView: UIViewController {
     
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var collectionView: UICollectionView!
-    let viewModel = FHSearchViewModel()
+    private let viewModel = FHSearchViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViewModel()
     }
     
-    func serachImageFor(queryString: String, index: IndexPath = IndexPath(item: 0, section:0)) {
+    private func serachImageFor(queryString: String, index: IndexPath = IndexPath(item: 0, section:0)) {
         viewModel.searchImage(for: index)
     }
     
-    func setupViewModel() {
+    private func setupViewModel() {
         
         viewModel.updateTableView = {
             DispatchQueue.main.async { [weak self] in
