@@ -13,7 +13,7 @@ import CoreData
 class FHDatabaseWorker {
     
     func fetchImages(with query: String, page: Int) -> [FHImageResult]? {
-        let context  = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        guard let context  = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext else { return nil }
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: "ImageData")
         request.predicate = NSPredicate(format: "query = %@ AND page = %@", argumentArray:  [query, page])
         do {
@@ -36,7 +36,7 @@ class FHDatabaseWorker {
     func saveImageResponse(_ imageData: [FHImageResult], page: Int, query: String) {
         guard !imageData.isEmpty else { return }
         DispatchQueue.main.async {
-            let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+            guard let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext else { return }
             let _ = imageData.map({ image -> Void in
                 let entity = NSEntityDescription.entity(forEntityName: "ImageData", in: context)
                 let object = NSManagedObject.init(entity: entity!, insertInto: context)
@@ -58,21 +58,25 @@ class FHDatabaseWorker {
         guard let dataToSave = image?.jpegData(compressionQuality: 1.0) else {
             return
         }
-        let context  = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "ImageData")
-        request.predicate = NSPredicate(format: "thumbnail = %@", argumentArray:  [thumbnailURLString])
-        do {
-            let result = try context.fetch(request)
-            if let object = result.first as? NSManagedObject {
-                object.setValue(dataToSave, forKey: "thumbnailImage")
+        DispatchQueue.main.async {
+            guard let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext else { return }
+            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "ImageData")
+            request.predicate = NSPredicate(format: "thumbnail = %@", argumentArray:  [thumbnailURLString])
+            do {
+                let result = try context.fetch(request)
+                if let object = result.first as? NSManagedObject {
+                    object.setValue(dataToSave, forKey: "thumbnailImage")
+                }
+            } catch {
+                print("Failed to fetch")
             }
-        } catch {
-            print("Failed to fetch")
         }
     }
     
     func fetchThumbnail(thumbnailURLString: String) -> UIImage? {
-        let context  = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        guard let context  = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext else {
+            return nil
+        }
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: "ImageData")
         request.predicate = NSPredicate(format: "thumbnail = %@", argumentArray:  [thumbnailURLString])
         do {

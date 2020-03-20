@@ -26,11 +26,9 @@ class FHSearchViewModel {
         let databaseWorker = FHDatabaseWorker()
         let page = (index.item / 10) + 1
         currentPage = page
-        print("## Fetching data for page : \(page)")
-        
+
         if let cachedImages = databaseWorker.fetchImages(with: queryString, page: page), !cachedImages.isEmpty {
             imageList.append(contentsOf: cachedImages)
-            print("## DB count \(imageList.count)")
             updateTableView?()
         } else {
             //fetch from server
@@ -39,19 +37,13 @@ class FHSearchViewModel {
             var query = FHSerachQuery()
             query.query = queryString
             query.pageNumber = page
+            
             worker.fetchImageList(query) { [weak self] result in
                 switch result {
                 case .failure(let error):
                     self?.handleError(error: error)
-                    
                 case .success(let imageList):
-                    //Save to database
-                    if let query = self?.queryString {
-                        databaseWorker.saveImageResponse(imageList, page: page, query: query)
-                        self?.imageList.append(contentsOf: imageList)
-                        self?.updateTableView?()
-                        print("## SERVER count \(self?.imageList.count ?? 0)")
-                    }
+                    self?.handleResponse(list: imageList, page: page)
                 }
                 self?.networkActivity?(false)
             }
@@ -67,24 +59,18 @@ class FHSearchViewModel {
         }
     }
     
+    func handleResponse(list: [FHImageResult], page: Int) {
+        let databaseWorker = FHDatabaseWorker()
+        databaseWorker.saveImageResponse(imageList, page: page, query: queryString)
+        imageList.append(contentsOf: list)
+        updateTableView?()
+    }
+    
     func fetchNextPage(index: IndexPath) {
         guard (imageList.count - index.item) < 2 else {
             return
         }
         searchImage(for: IndexPath(item: index.item + 2, section: index.section))
-    }
-    
-    func downloadImageFor(thumbnail: String, completion: @escaping ((UIImage?) -> Void)) {
-        let databaseWorker = FHDatabaseWorker()
-        if let image = databaseWorker.fetchThumbnail(thumbnailURLString: thumbnail) {
-            completion(image)
-        } else {
-            let imageWorker = FHImageWorker()
-            imageWorker.fetchImage(stringURL: thumbnail) { (image) in
-                databaseWorker.updateThumbnail(thumbnailURLString: thumbnail, image: image)
-                completion(image)
-            }
-        }
     }
     
     func resetData() {

@@ -20,7 +20,8 @@ struct FHAPIWorker {
         static let ImageSearchAPI = "https://contextualwebsearch-websearch-v1.p.rapidapi.com/api/Search/ImageSearchAPI"
     }
     
-    func fetchImageList(_ query: FHSerachQuery, completion:@escaping (Result<[FHImageResult], ErrorDetails>) ->Void) {
+    func fetchImageList(_ query: FHSerachQuery,
+                        completion:@escaping (Result<[FHImageResult], ErrorDetails>) ->Void) {
         
         guard var apiURL = URLComponents(string: Constant.ImageSearchAPI) else {
             completion(.failure(.failed))
@@ -46,10 +47,6 @@ struct FHAPIWorker {
                 completion(.failure(.responseNotReceived))
                 return
             }
-            
-            //if let JSONString = String(data: jsonResponse, encoding: .utf8) {
-               //print(JSONString)
-            //}
 
             do {
                 let decoder = JSONDecoder()
@@ -62,5 +59,4 @@ struct FHAPIWorker {
         }
         task.resume()
     }
-    
 }
