@@ -12,7 +12,7 @@ class FHImagePreview: UIViewController {
     
     var imageURLString = ""
     @IBOutlet weak var imageView: UIImageView!
-    var viewModel = FHImagePreviewViewModel()
+    private var viewModel = FHImagePreviewViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()

@@ -12,7 +12,7 @@ import UIKit
 class FHTileCollectionCell: UICollectionViewCell {
         
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
-    var viewModel = FHTileCollectionCellViewModel()
+    private var viewModel = FHTileCollectionCellViewModel()
     @IBOutlet weak var imageView: UIImageView!
     
     override func prepareForReuse() {

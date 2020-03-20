@@ -12,8 +12,6 @@ import UIKit
 class FHSearchViewModel {
     
     var queryString = ""
-    var thumnails = [String]()
-    var currentPage = 0
     var imageList = [FHImageResult]()
     
     //calllbacks
@@ -25,7 +23,6 @@ class FHSearchViewModel {
         //check in database
         let databaseWorker = FHDatabaseWorker()
         let page = (index.item / 10) + 1
-        currentPage = page
 
         if let cachedImages = databaseWorker.fetchImages(with: queryString, page: page), !cachedImages.isEmpty {
             imageList.append(contentsOf: cachedImages)
@@ -50,7 +47,7 @@ class FHSearchViewModel {
         }
     }
     
-    func handleError(error: ErrorDetails) {
+    private func handleError(error: ErrorDetails) {
         switch error {
         case .responseNotReceived:
             showError?("No response from server")
@@ -59,7 +56,7 @@ class FHSearchViewModel {
         }
     }
     
-    func handleResponse(list: [FHImageResult], page: Int) {
+    private func handleResponse(list: [FHImageResult], page: Int) {
         let databaseWorker = FHDatabaseWorker()
         databaseWorker.saveImageResponse(imageList, page: page, query: queryString)
         imageList.append(contentsOf: list)
@@ -74,8 +71,6 @@ class FHSearchViewModel {
     }
     
     func resetData() {
-        thumnails = [String]()
-        currentPage = 0
         imageList = [FHImageResult]()
     }
 }
